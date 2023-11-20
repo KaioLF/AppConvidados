@@ -2,59 +2,77 @@ package com.devmasterteam.convidados.service.repository
 
 import android.content.Context
 import com.devmasterteam.convidados.service.model.GuestModel
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
-class GuestRepository (context: Context) {
+class GuestRepository(context: Context) {
 
-    // Acesso ao banco de dados
     private val dataBase = GuestDatabase.getDatabase(context).guestDAO()
+    private val firebase = FirebaseFirestore.getInstance()
 
-    /**
-     * Carrega convidado
-     */
-    fun get(id: Int): GuestModel {
+    fun saveGuest(guest: GuestModel): Boolean {
+        val localSaveResult = dataBase.save(guest)
+
+        // Se a operação local foi bem-sucedida, salvar no Firebase
+        if (localSaveResult > 0) {
+            saveGuestToFirebase(guest)
+            return true
+        }
+
+        return false
+    }
+
+    fun updateGuest(guest: GuestModel): Boolean {
+        val localUpdateResult = dataBase.update(guest)
+
+        // Se a operação local foi bem-sucedida, atualizar no Firebase
+        if (localUpdateResult > 0) {
+            updateGuestInFirebase(guest)
+            return true
+        }
+
+        return false
+    }
+
+    fun deleteGuest(guest: GuestModel) {
+        // Deletar localmente
+        dataBase.delete(guest)
+
+        // Deletar no Firebase
+        deleteGuestInFirebase(guest)
+    }
+
+    fun getGuest(id: Int): GuestModel {
         return dataBase.load(id)
     }
 
-    /**
-     * Insere convidado
-     */
-    fun save(guest: GuestModel): Boolean {
-        return dataBase.save(guest) > 0
-    }
-
-    /**
-     * Faz a listagem de todos os convidados
-     */
-    fun getAll(): List<GuestModel> {
+    fun getAllGuests(): List<GuestModel> {
         return dataBase.getInvited()
     }
 
-    /**
-     * Faz a listagem de todos os convidados presentes
-     */
-    fun getPresent(): List<GuestModel> {
+    fun getPresentGuests(): List<GuestModel> {
         return dataBase.getPresent()
     }
 
-    /**
-     * Faz a listagem de todos os convidados presentes
-     */
-    fun getAbsent(): List<GuestModel> {
+    fun getAbsentGuests(): List<GuestModel> {
         return dataBase.getAbsent()
     }
 
-    /**
-     * Atualiza convidado
-     */
-    fun update(guest: GuestModel): Boolean {
-        return dataBase.update(guest) > 0
+    private fun saveGuestToFirebase(guest: GuestModel) {
+        // Salvando no Firestore
+        val guestDocument = firebase.collection("guests").document(guest.id.toString())
+        guestDocument.set(guest)
     }
 
-    /**
-     * Remove convidado
-     */
-    fun delete(guest: GuestModel) {
-        dataBase.delete(guest)
+    private fun updateGuestInFirebase(guest: GuestModel) {
+        // Atualizando no Firestore
+        val guestDocument = firebase.collection("guests").document(guest.id.toString())
+        guestDocument.set(guest, SetOptions.merge())
     }
 
+    private fun deleteGuestInFirebase(guest: GuestModel) {
+        // Deletando no Firestore
+        val guestDocument = firebase.collection("guests").document(guest.id.toString())
+        guestDocument.delete()
+    }
 }

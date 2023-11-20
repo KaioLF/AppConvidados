@@ -16,18 +16,16 @@ class GuestsViewModel(application: Application) : AndroidViewModel(application) 
     val guestList: LiveData<List<GuestModel>> = mGuestList
 
     fun load(filter: Int) {
-
         if (filter == GuestConstants.FILTER.EMPTY) {
-            mGuestList.value = mGuestRepository.getAll()
+            mGuestList.value = mGuestRepository.getAllGuests()
         } else if (filter == GuestConstants.FILTER.PRESENT) {
-            mGuestList.value = mGuestRepository.getPresent()
+            mGuestList.value = mGuestRepository.getPresentGuests()
         } else {
-            mGuestList.value = mGuestRepository.getAbsent()
+            mGuestList.value = mGuestRepository.getAbsentGuests()
         }
     }
 
     fun delete(id: Int) {
-        mGuestRepository.delete(mGuestRepository.get(id))
+        mGuestRepository.deleteGuest(mGuestRepository.getGuest(id))
     }
-
 }

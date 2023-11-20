@@ -29,9 +29,9 @@ class GuestFormViewModel(application: Application) : AndroidViewModel(applicatio
         }
 
         if (id == 0) {
-            _saveGuest.value = guestRepository.save(guest)
+            _saveGuest.value = guestRepository.saveGuest(guest)
         } else {
-            _saveGuest.value = guestRepository.update(guest)
+            _saveGuest.value = guestRepository.updateGuest(guest)
         }
     }
 
@@ -39,7 +39,6 @@ class GuestFormViewModel(application: Application) : AndroidViewModel(applicatio
      * Carrega convidado
      * */
     fun load(id: Int) {
-        _guest.value = guestRepository.get(id)
+        _guest.value = guestRepository.getGuest(id)
     }
-
 }
